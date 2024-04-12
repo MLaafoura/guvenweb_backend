@@ -9,12 +9,31 @@ class UserAccountManager(BaseUserManager):
             raise ValueError('User must Have an email')
         
         email = self.normalize_email(email)
-        user = self.model(email=email, fullName=fullName, phone_number=phone_number, is_admin=is_admin,
-                           is_cyber_expert=is_cyber_expert, is_client=is_client)
-        
-        user.save()
-
+        email = email.lower()
+        user = self.model(
+            email=self.normalize_email(email),
+            fullName=fullName,
+            phone_number=phone_number,
+            is_admin=is_admin
+        )
+        user.set_password(password)
+        user.save(using=self._db)
         return user
+        
+
+    def create_superuser(self, email,fullName, phone_number, password=None,is_admin=True, **extra_fields):
+        user = self.create_user(
+            email=email,
+            fullName=fullName,
+            phone_number=phone_number, 
+            password=password,
+            is_admin=is_admin, 
+            **extra_fields)
+
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+    
 
 class GuvenUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
@@ -39,4 +58,16 @@ class GuvenUser(AbstractBaseUser, PermissionsMixin):
     def check_client(self):
         return self.is_client
     
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        return True
+    
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        return self.is_admin
 
