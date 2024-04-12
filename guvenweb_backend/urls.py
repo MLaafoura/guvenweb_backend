@@ -1,22 +1,19 @@
-"""
-URL configuration for guvenweb_backend project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from GuvenWebScam.views import *
+from django.urls import include
+from GuvenWebUser import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+    path('activate/<uid>/<token>/', include('djoser.urls.jwt')),
+    path('activate/<uid>/<token>/', views.activate_account, name='activate'),
+    path('scamreport/',get_all_scams),
+    path('scamreport/<int:scam_id>/',get_scamreport_by_id),
+    path('scamreport/createscamreport/',create_scam_report),
+    path('scamreport/<int:scam_id>/update/',update_scam_report),
+    path('scamreport/<int:id>/delete',delete_scam_report),
 ]
